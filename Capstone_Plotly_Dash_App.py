@@ -47,15 +47,20 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
 @app.callback(Output(component_id='success-pie-chart', component_property='figure'),
                     Input(component_id='site-dropdown', component_property='value'))
 def get_pie_chart(entered_site):
-    #filtered_df = spacex_df
+    
     if entered_site == 'ALL' or entered_site == None:
-        data  = spacex_df[spacex_df['class'] == 1]
+        filtered_df = spacex_df[spacex_df['class'] == 1]
+    else:
+        filtered_df = spacex_df[spacex_df['Launch Site'] == entered_site]
+
+    if entered_site == 'ALL' or entered_site == None:
+        data  = filtered_df
         fig = px.pie(data, values='class', 
         names='Launch Site',
         title='Total Sucessful Launches for all Sites')
         return fig
     else:
-        data = spacex_df[spacex_df['Launch Site'] == entered_site]
+        data = filtered_df
         # return the outcomes piechart for a selected site
         fig = px.pie(data, 
         names='class',
@@ -67,10 +72,18 @@ def get_pie_chart(entered_site):
               [Input(component_id='site-dropdown', component_property='value'), 
                Input(component_id="payload-slider", component_property="value")])
 def get_scatter_chart(entered_site,payload_slider):
-    #filtered_df = spacex_df
-    #min_pl, max_pl = payload_slider
+    
     if entered_site == 'ALL' or entered_site == None:
-        data = spacex_df
+        filtered_df = spacex_df
+    else:
+        filtered_df = spacex_df[spacex_df['Launch Site'] == entered_site]
+    
+    min_pl, max_pl = payload_slider
+    
+    filtered_df = filtered_df[(filtered_df['Payload Mass (kg)'] > min_pl)&(filtered_df['Payload Mass (kg)'] < max_pl)]
+
+    if entered_site == 'ALL' or entered_site == None:
+        data = filtered_df
         fig = px.scatter(data,
         x = 'Payload Mass (kg)',
         y = 'class',
@@ -78,7 +91,7 @@ def get_scatter_chart(entered_site,payload_slider):
         title='Correlation between Payload and Sucess for all Sites')
         return fig
     else:
-        data = spacex_df[spacex_df['Launch Site'] == entered_site]
+        data = filtered_df
         # return the outcomes piechart for a selected site
         fig = px.scatter(data, 
         x = 'Payload Mass (kg)',
